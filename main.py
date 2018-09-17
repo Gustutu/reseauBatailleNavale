@@ -5,18 +5,35 @@ import pygame
 print("coucou")
 
 
-petitBateau = BatNav.Bateau(3, 6, 6, 0)
-moyenBateau = BatNav.Bateau(4, 2, 2, 1)
-grandBateau = BatNav.Bateau(5, 2, 7, 0)
-boardGame = BatNav.BoardGame(10)
+#petitBateau = BatNav.Bateau(3, 6, 6, 0)
+#moyenBateau = BatNav.Bateau(4, 2, 2, 1)
+#grandBateau = BatNav.Bateau(5, 2, 7, 0)
+boardGame = BatNav.BoardGame(20)
 
-hugo=BatNav.client("Hugo")
+#hugo=BatNav.client("Hugo")
 
-hugo.addBoat(petitBateau)
-hugo.addBoat(moyenBateau)
-hugo.addBoat(grandBateau)
-print(hugo)
+name=input("Quel est ton nom?")
+player=BatNav.client(name)
+again='ok'
+i=0
+bateau=[]
+while again == 'ok':
+    taille = input("Quelle taille fait votre bateau ?")
+    posX = input("Quelle coordonnée X ?")
+    posY = input("Quelle coordonnée Y ?")
+    orientation = input("Quelle orientation (horizontal=0/vertical=1) ?")
+    bateau.append(BatNav.Bateau(int(taille), int(posX), int(posY), int(orientation)))
+    again = input("Voulez vous faire un autre bateau (ok/no) ?")
+    i=i+1
 
+for x in range(0, len(bateau)):
+    player.addBoat(bateau[x])
+
+print(player)
+
+for x in range(0, len(bateau)):
+    boardGame.renderBoats(bateau[x])
+    boardGame.print()
 
 
 
@@ -27,8 +44,4 @@ print(hugo)
 
 
 
-boardGame.renderBoats(petitBateau)
-boardGame.renderBoats(moyenBateau)
-boardGame.renderBoats(grandBateau)
-boardGame.print()
 time.sleep(5)
