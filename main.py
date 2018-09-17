@@ -1,7 +1,6 @@
 
 import time
 import BatailleNavaleClasses as BatNav
-import pygame
 print("coucou")
 
 
