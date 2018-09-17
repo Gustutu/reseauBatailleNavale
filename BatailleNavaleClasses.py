@@ -17,8 +17,8 @@ class Bateau:
         # self.image, self.rect = load_png('ball.png')
 
     def placeBoat(self, _Xpos=None, _Ypos=None, _rotation=None):
-        self.Xpos = _Xpos
-        self.Ypos = _Ypos
+        self.Xpos = _Xpos-1
+        self.Ypos = _Ypos-1
         self.rotation = _rotation
 
     def __str__(self):
@@ -55,17 +55,20 @@ class BoardGame:
 
     def renderBoats(self, bateau):
         if bateau.rotation == 0:
-            for i in range(-1, 1):
-                if(self.boardTab[bateau.Ypos][bateau.Xpos] == 1):
+            for i in range(1, bateau.size):
+                if self.boardTab[bateau.Ypos][bateau.Xpos+i] == 1:
                     break
 
-            i = -1
+            i = 0
             for caseEtatBateau in bateau.etat:
                 self.boardTab[bateau.Ypos][bateau.Xpos+i] = caseEtatBateau
                 i = i+1
 
         else:
-            i = -1
+            for i in range(1, bateau.size):
+                if self.boardTab[bateau.Ypos+i][bateau.Xpos] == 1:
+                    break
+            i = 0
             for caseEtatBateau in bateau.etat:
                 self.boardTab[bateau.Ypos+i][bateau.Xpos] = caseEtatBateau
                 i = i+1
