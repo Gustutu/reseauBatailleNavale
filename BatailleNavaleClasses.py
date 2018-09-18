@@ -1,5 +1,5 @@
 
-import pygame
+
 
 # utilisation de set pour list de bateau par client
 
