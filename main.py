@@ -1,7 +1,7 @@
 
 import time
 import BatailleNavaleClasses as BatNav
-
+import pygame
 print("coucou")
 
 
@@ -33,8 +33,7 @@ print(player)
 
 for x in range(0, len(bateau)):
     boardGame.renderBoats(bateau[x])
-
-boardGame.print()
+    boardGame.print()
 
 
 
