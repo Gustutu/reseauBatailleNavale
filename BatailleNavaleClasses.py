@@ -45,7 +45,6 @@ class client:
 class BoardGame:
     listClient = [None]
     # boardTab[][]
-
     def __init__(self, size):
         # creation d'un tableau 2D de zeros de taille size
         self.boardTab = [[0] * size for _ in range(size)]
