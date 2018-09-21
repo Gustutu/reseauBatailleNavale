@@ -11,8 +11,11 @@ boardGame = BatNav.BoardGame(20)
 
 #hugo=BatNav.client("Hugo")
 
+
+
+
 name=input("Quel est ton nom?")
-player=BatNav.client(name)
+player=BatNav.gameMaster(name)
 again='ok'
 i=0
 bateau=[]
