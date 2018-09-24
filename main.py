@@ -37,13 +37,27 @@ for x in range(0, len(bateau)):
 
 boardGame.print()
 
-
-
-
+time.sleep(5)
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print(".")
+print("C'est désormais le moment pour les joueurs de participer !")
 #print ("".join(str(boardGame.boardTab)))
 
 #print ('\n'.join(''.join(*zip(*row)) for row in boardGame.boardTab))
 
 
 
-time.sleep(5)
+

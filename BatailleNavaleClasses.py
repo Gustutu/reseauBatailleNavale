@@ -121,7 +121,7 @@ class BoardGame:
 
             for i in range(0, bateau.size-1):
                 if self.boardTab[bateau.Ypos][bateau.Xpos+i] == 1:
-                    print("there is another boat here (Pos: X Y)", bateau.Xpos, bateau.Ypos)
+                    print("there is another boat here (Pos: X Y)", bateau.Xpos+1, bateau.Ypos+1)
                     return 0
 
             #i = 0
