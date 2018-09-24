@@ -33,8 +33,9 @@ for x in range(0, len(bateau)):
 print(player)
 
 for x in range(0, len(bateau)):
-    boardGame.renderBoats(bateau[x],SIZE)
-    boardGame.print()
+    boardGame.renderBoats(bateau[x], SIZE)
+
+boardGame.print()
 
 
 

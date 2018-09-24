@@ -112,30 +112,41 @@ class BoardGame:
         self.listClient.append(client)
 
     def renderBoats(self, bateau, sizeboard):
+        #horizontal
         if bateau.rotation == 0:
+            #Verification collision
             if bateau.Xpos+bateau.size > sizeboard:
                 print("out of range")
-                return 0;
-            for i in range(1, bateau.size):
+                return 0
+
+            for i in range(0, bateau.size-1):
                 if self.boardTab[bateau.Ypos][bateau.Xpos+i] == 1:
-                    break
+                    print("there is another boat here (Pos: X Y)", bateau.Xpos, bateau.Ypos)
+                    return 0
 
-            i = 0
-            for caseEtatBateau in bateau.etat:
-                self.boardTab[bateau.Ypos][bateau.Xpos+i] = caseEtatBateau
-                i = i+1
-
+            #i = 0
+            # Mise des cases à 1
+                else:
+                        for caseEtatBateau in bateau.etat:
+                            self.boardTab[bateau.Ypos][bateau.Xpos+i] = caseEtatBateau
+                            i = i+1
+        #vertical
         else:
+            #Verification collision
             if bateau.Ypos+bateau.size > sizeboard:
                 print("out of range")
-                return 0;
-            for i in range(1, bateau.size):
+                return 0
+
+            for i in range(0, bateau.size-1):
                 if self.boardTab[bateau.Ypos+i][bateau.Xpos] == 1:
-                    break
-            i = 0
-            for caseEtatBateau in bateau.etat:
-                self.boardTab[bateau.Ypos+i][bateau.Xpos] = caseEtatBateau
-                i = i+1
+                    print("there is another boat here (Pos: X Y)", bateau.Xpos, bateau.Ypos)
+                    return 0
+                #i = 0
+            # Mise des cases à 1
+                else:
+                    for caseEtatBateau in bateau.etat:
+                        self.boardTab[bateau.Ypos+i][bateau.Xpos] = caseEtatBateau
+                        i = i+1
 
     def print(self):  # affiche le tableau boardTab a la maniere d'un tableau
         for c in self.boardTab:
