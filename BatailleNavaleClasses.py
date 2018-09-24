@@ -1,5 +1,4 @@
 
-import pygame
 
 # utilisation de set pour list de bateau par client
 import socket 
@@ -22,11 +21,11 @@ class Bateau:
         self.rotation = _rotation
 
     def __str__(self):
-        return "size:{},Xpos:{},Ypos:{},rotation{}".format(self.size,self.Xpos,self.Ypos,self.rotation)
+        return "size:{},Xpos:{},Ypos:{},rotation{}".format(self.size,self.Xpos+1,self.Ypos+1,self.rotation)
            
 
 
-class socketManager() : #la calsse socket manager hérite du module socket
+"""class socketManager() : #la calsse socket manager hérite du module socket
 
     import socket 
     import select
@@ -80,7 +79,7 @@ class socketManager() : #la calsse socket manager hérite du module socket
     for client in clients_connectes:
         client.close()
 
-    connexion_principale.close()
+    connexion_principale.close()"""
 
 class gameMaster:
     def __init__(self, name):
@@ -112,8 +111,11 @@ class BoardGame:
     def addClient(self, client):
         self.listClient.append(client)
 
-    def renderBoats(self, bateau):
+    def renderBoats(self, bateau, sizeboard):
         if bateau.rotation == 0:
+            if bateau.Xpos+bateau.size > sizeboard:
+                print("out of range")
+                return 0;
             for i in range(1, bateau.size):
                 if self.boardTab[bateau.Ypos][bateau.Xpos+i] == 1:
                     break
@@ -124,6 +126,9 @@ class BoardGame:
                 i = i+1
 
         else:
+            if bateau.Ypos+bateau.size > sizeboard:
+                print("out of range")
+                return 0;
             for i in range(1, bateau.size):
                 if self.boardTab[bateau.Ypos+i][bateau.Xpos] == 1:
                     break
