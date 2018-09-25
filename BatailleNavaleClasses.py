@@ -86,8 +86,10 @@ class gameMaster:
         self.name = name
         self.Boats = []
 
-    def addBoat(self, boat):
-        self.Boats.append(boat)
+    def tryAddBoat(self, boat):
+        if BoardGame.tryAndAddBoat(boat)==1:
+            self.Boats.append(boat)
+
 
     def __str__(self):
 
@@ -103,19 +105,27 @@ class gameMaster:
 
 class BoardGame:
     listClient = [None]
+    size=0
     # boardTab[][]
     def __init__(self, size):
         # creation d'un tableau 2D de zeros de taille size
         self.boardTab = [[0] * size for _ in range(size)]
+        self.size=size
 
     def addClient(self, client):
         self.listClient.append(client)
 
-    def renderBoats(self, bateau, sizeboard):
+    def renderAllBoats(self,BoatList):
+        for boat in BoatList:
+            self.renderBoats(boat)
+
+
+
+    def tryAndAddBoat(bateau):
         #horizontal
         if bateau.rotation == 0:
             #Verification collision
-            if bateau.Xpos+bateau.size > sizeboard:
+            if bateau.Xpos+bateau.size > BoardGame.size:
                 print("out of range")
                 return 0
 
@@ -130,10 +140,11 @@ class BoardGame:
                         for caseEtatBateau in bateau.etat:
                             self.boardTab[bateau.Ypos][bateau.Xpos+i] = caseEtatBateau
                             i = i+1
+                        return 1
         #vertical
         else:
             #Verification collision
-            if bateau.Ypos+bateau.size > sizeboard:
+            if bateau.Ypos+bateau.size > BoardGame.size:
                 print("out of range")
                 return 0
 
@@ -147,6 +158,7 @@ class BoardGame:
                     for caseEtatBateau in bateau.etat:
                         self.boardTab[bateau.Ypos+i][bateau.Xpos] = caseEtatBateau
                         i = i+1
+                    return 1
 
     def print(self):  # affiche le tableau boardTab a la maniere d'un tableau
         for c in self.boardTab:

@@ -14,28 +14,28 @@ boardGame = BatNav.BoardGame(SIZE)
 
 
 name=input("Quel est ton nom? ")
-player=BatNav.gameMaster(name)
+gameMaster=BatNav.gameMaster(name)
 again='ok'
 i=0
-bateau=[]
+
 while again == 'ok':
     taille = input("Quelle taille fait votre bateau? ")
     posX = input("Quelle coordonnée X ? ")
     posY = input("Quelle coordonnée Y ? ")
     orientation = input("Quelle orientation (horizontal=0/vertical=1)? ")
-    bateau.append(BatNav.Bateau(int(taille), int(posX), int(posY), int(orientation)))
+    gameMaster.tryAddBoat(BatNav.Bateau(int(taille), int(posX), int(posY), int(orientation)))
     again = input("Voulez vous faire un autre bateau (ok/no) ? ")
     i=i+1
 
-for x in range(0, len(bateau)):
-    player.addBoat(bateau[x])
 
-print(player)
+print(gameMaster)
 
-for x in range(0, len(bateau)):
-    boardGame.renderBoats(bateau[x], SIZE)
+boardGame.renderAllBoats(gameMaster.Boats)
 
-boardGame.print()
+#for x in range(0, len(bateaux)):
+ #   boardGame.renderBoats(bateaux[x], SIZE)
+
+#oardGame.print()
 
 time.sleep(5)
 print(".")
