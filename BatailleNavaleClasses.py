@@ -122,8 +122,8 @@ class BoardGame:
                         i = i+1
                     return 1
 
-    def tryAndFoundBoat(Xpos, Ypos):
-        if BoardGame.boardTab[Xpos, Ypos] == 1:
+    def tryAndFoundBoat(xpos, ypos):
+        if BoardGame.boardTab[xpos-1][ypos-1] == 1:
             return 1
         else:
             return 0

@@ -54,8 +54,8 @@ gamePlayer = BatNav.gamePlayer(name)
 
 print("Bonjour", name)
 
-X = input("Rentrez la première coordonnée")
-Y = input("Maintenant la seconde coordonnée")
+X = input("Rentrez la première coordonnée ")
+Y = input("Maintenant la seconde coordonnée ")
 
 X = int(X)
 Y = int(Y)
