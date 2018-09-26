@@ -43,12 +43,21 @@ class gameMaster:
         return "nom:{} \n {}".format(self.name, toreturn)
 
 
-# class gamePlayer :
+class gamePlayer :
     def __init__(self,name):
         self.name=name
 
-    def tryFoundBoat(self, boat):
-        if BoardGame.tryFoundBoat()
+    def tryFoundBoat(self, position):
+        if BoardGame.tryFoundBoat(position)==1:
+            print("Touché",position)
+        else:
+            if BoardGame.tryFoundBoat(position)==2:
+                print("Coulé",position)
+            else:
+                if BoardGame.tryFoundBoat(position)==0:
+                    print("Loupé",position)
+                else:
+                    print("Error")
 
 
 class BoardGame:
