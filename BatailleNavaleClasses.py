@@ -43,7 +43,12 @@ class gameMaster:
         return "nom:{} \n {}".format(self.name, toreturn)
 
 
-# class client :
+# class gamePlayer :
+    def __init__(self,name):
+        self.name=name
+
+    def tryFoundBoat(self, boat):
+        if BoardGame.tryFoundBoat()
 
 
 class BoardGame:
@@ -107,6 +112,11 @@ class BoardGame:
                                            i][bateau.Xpos] = caseEtatBateau
                         i = i+1
                     return 1
+
+    def tryFoundBoat(bateau):
+
+
+
 
     def print(self):  # affiche le tableau boardTab a la maniere d'un tableau
         for c in BoardGame.boardTab:
