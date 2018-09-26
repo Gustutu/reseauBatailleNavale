@@ -33,19 +33,19 @@ class ThreadConnexion(threading.Thread):
                 self.app.verrou.release()
                 # fermer le présent thread :
                 break
-            elif deb=='A1' :
+            elif deb=='11' :
                 self.app.verrou.acquire()
                 message = "touché"
                 self.app.conn_client[nom].send(message.encode("Utf8"))
                 self.app.verrou.release()
-            elif deb=='A2' :
+            elif deb=='22' :
                 self.app.verrou.acquire()
                 for cli in self.app.conn_client:
                     if cli != nom:
                         message = "bateau coulé "
                         self.app.conn_client[cli].send(message.encode("Utf8"))
                 self.app.verrou.release()
-            elif deb=='A3' :
+            elif deb=='33' :
                 self.app.verrou.acquire()
                 message = "a l'eau"
                 self.app.conn_client[nom].send(message.encode("Utf8"))

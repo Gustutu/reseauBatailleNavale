@@ -82,7 +82,7 @@ class AppClient(AppServeur):
 
 
     def envoyermsg(self):
-        self.connex.envoie_msg(self.textlabel)
+        self.connex.envoie_msg(str(int(self.CX))+str(int(self.CY)))
 
 
 
