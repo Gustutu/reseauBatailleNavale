@@ -50,11 +50,16 @@ print(".")
 print("C'est désormais le moment pour les joueurs de participer !")
 
 name = input("Quel est ton nom joueur 1? ")
-gameMaster = BatNav.gamePlayer(name)
+gamePlayer = BatNav.gamePlayer(name)
 
-print("Bonjour",name)
+print("Bonjour", name)
 
+X = input("Rentrez la première coordonnée")
+Y = input("Maintenant la seconde coordonnée")
 
+X = int(X)
+Y = int(Y)
+gamePlayer.tryFoundBoat(X, Y)
 
 #print ("".join(str(boardGame.boardTab)))
 
