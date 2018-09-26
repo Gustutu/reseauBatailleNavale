@@ -122,7 +122,7 @@ class BoardGame:
                         i = i+1
                     return 1
 
-    def tryFoundBoat(bateau):
+#    def tryFoundBoat(bateau):
 
 
 
