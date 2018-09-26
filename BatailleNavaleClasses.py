@@ -47,15 +47,15 @@ class gamePlayer :
     def __init__(self,name):
         self.name=name
 
-    def tryFoundBoat(self, position):
-        if BoardGame.tryFoundBoat(position)==1:
-            print("Touché",position)
+    def tryFoundBoat(self,Xpos,Ypos):
+        if BoardGame.tryFoundBoat(Xpos,Ypos)==1:
+            print("Touché",Xpos,Ypos)
         else:
-            if BoardGame.tryFoundBoat(position)==2:
-                print("Coulé",position)
+            if BoardGame.tryFoundBoat(Xpos,Ypos)==2:
+                print("Coulé",Xpos,Ypos)
             else:
-                if BoardGame.tryFoundBoat(position)==0:
-                    print("Loupé",position)
+                if BoardGame.tryFoundBoat(Xpos,Ypos)==0:
+                    print("Loupé",Xpos,Ypos)
                 else:
                     print("Error")
 
@@ -122,7 +122,13 @@ class BoardGame:
                         i = i+1
                     return 1
 
-#    def tryFoundBoat(bateau):
+    def tryFoundBoat(Xpos,Ypos):
+        if BoardGame.boardTab[Xpos,Ypos]==1:
+            return 1
+        else:
+            return 0
+
+
 
 
 

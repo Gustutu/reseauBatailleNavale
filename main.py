@@ -52,6 +52,8 @@ print("C'est désormais le moment pour les joueurs de participer !")
 name = input("Quel est ton nom joueur 1? ")
 gameMaster = BatNav.gamePlayer(name)
 
+print("Bonjour",name)
+
 
 
 #print ("".join(str(boardGame.boardTab)))
