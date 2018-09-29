@@ -3,7 +3,7 @@
 from tkinter import *
 import socket, sys, threading, time
 from Serveur import AppServeur
-host, port = '0.0.0.0', 2010
+host, port = '127.0.0.1', 2010
 largeur, hauteur = 700, 400
 COTE=400
 NB_DE_CASES=10
@@ -20,8 +20,8 @@ class ThreadSocket(threading.Thread):
         self.connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.connexion.connect((host, port))
-        except socket.error:
-            print("La connexion a échoué.")
+        except socket.error as e:
+            print(e,"La connexion a échoué.")
             sys.exit()
         print("Connexion établie avec le serveur.")
 

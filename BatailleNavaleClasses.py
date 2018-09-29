@@ -22,6 +22,8 @@ class Bateau:
         self.Ypos = _Ypos-1
         self.rotation = _rotation
 
+    
+
     def __str__(self):
         return "size:{},Xpos:{},Ypos:{},rotation{}".format(self.size, self.Xpos+1, self.Ypos+1, self.rotation)
 
