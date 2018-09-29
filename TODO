@@ -1,9 +1,16 @@
+
+
+
+
+
+#TODO:
 empecher les entrées incohérentes (tailles et pos negatives)
-
-
-
-
-
-
+verifié a chaque bateau touché si le bateau concérné est coulé
 
 Sockets!
+
+
+
+
+#Done
+ajout de la classe case
