@@ -7,6 +7,7 @@ largeur, hauteur = 700, 400
 
 from tkinter import *
 import socket, sys, threading, time
+import BatailleNavaleClasses as BatNav
 
 class ThreadConnexion(threading.Thread):
     """objet thread gestionnaire d'une connexion client"""
@@ -14,6 +15,7 @@ class ThreadConnexion(threading.Thread):
         threading.Thread.__init__(self)
         self.connexion = conn           # réf. du socket de connexion
         self.app = boss
+
         # réf. de la fenêtre application
 
 
@@ -60,8 +62,15 @@ class ThreadConnexion(threading.Thread):
         self.app.afficher("Client %s déconnecté.\n" % nom)
         # Le thread se termine ici
 
-
-
+    def veriflogin(self) :
+        msgClient = self.connexion.recv(1024).decode("Utf8")
+        print("ref" + msgClient)
+        if msgClient == 'usertoto' :
+            return True
+        else :
+            return False
+    def closeth(self):
+        self.connexion.close()
 
 class ThreadClients(threading.Thread):
 
@@ -83,20 +92,26 @@ class ThreadClients(threading.Thread):
             var = self.boss.recupvar()
             if var !=0 :
                 nouv_conn, adresse = self.connex.accept()
-                var = self.boss.decrevar()
-                print(var)
                 # Créer un nouvel objet thread pour gérer la connexion :
                 th = ThreadConnexion(self.boss, nouv_conn)
-                th.start()
-                it = th.getName()        # identifiant unique du thread
-                # Mémoriser la connexion dans le dictionnaire :
-                self.boss.enregistrer_connexion(nouv_conn, it)
-                # Afficher :
-                txt = "Client %s connecté, adresse IP %s, port %s.\n" %\
-                       (it, adresse[0], adresse[1])
-                self.boss.afficher(txt)
-                # Commencer le dialogue avec le client :
-                nouv_conn.send("serveur OK".encode("Utf8"))
+                if th.veriflogin() == True :
+                    var = self.boss.decrevar()
+                    th.start()
+                    it = th.getName()        # identifiant unique du thread
+                    # Mémoriser la connexion dans le dictionnaire :
+                    self.boss.enregistrer_connexion(nouv_conn, it)
+                    # Afficher :
+                    txt = "Client %s connecté, adresse IP %s, port %s.\n" %\
+                           (it, adresse[0], adresse[1])
+                    self.boss.afficher(txt)
+                    # Commencer le dialogue avec le client :
+                    nouv_conn.send("serveur OK".encode("Utf8"))
+                else :
+                    nouv_conn.send("wrong login".encode("Utf8"))
+                    th.closeth()
+            else :
+                self.boss.initjeux()
+
 
 class AppBN(Frame):
     '''Fenêtre principale de l'application'''
@@ -167,7 +182,7 @@ class AppServeur(AppBN):
                 txt = "Serveur up \n"
                 self.avis.insert(END, txt)
                 # démarrage du thread guettant la connexion des clients :
-                self.textlabel.set(3)
+                self.textlabel.set(2)
                 self.accueil = ThreadClients(self, connexion)
                 self.accueil.start()
 
@@ -182,9 +197,32 @@ class AppServeur(AppBN):
         self.textlabel.set(int(self.textlabel.get())-1)
     def recupvar(self):
         return  int(self.textlabel.get())
+    def initjeux(self):
+            # petitBateau = BatNav.Bateau(3, 6, 6, 0)
+            # moyenBateau = BatNav.Bateau(4, 2, 2, 1)
+            # grandBateau = BatNav.Bateau(5, 2, 7, 0)
+            boardGame = BatNav.BoardGame(10)
 
+            # hugo=BatNav.client("Hugo")
 
+            name = input("Quel est ton nom? ")
+            gameMaster = BatNav.gameMaster(name)
+            again = 'ok'
+            i = 0
 
+            while again == 'ok':
+                taille = input("Quelle taille fait votre bateau? ")
+                posX = input("Quelle coordonnée X ? ")
+                posY = input("Quelle coordonnée Y ? ")
+                orientation = input("Quelle orientation (horizontal=0/vertical=1)? ")
+                gameMaster.tryAddBoat(BatNav.Bateau(
+                    int(taille), int(posX), int(posY), int(orientation)))
+                again = input("Voulez vous faire un autre bateau (ok/no) ? ")
+                i = i + 1
+
+            print(gameMaster)
+
+            boardGame.print()
 
 if __name__ =='__main__':
     AppServeur(host, port, largeur, hauteur).mainloop()
