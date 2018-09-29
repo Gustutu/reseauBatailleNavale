@@ -1,7 +1,9 @@
 # -*- coding:Utf8 -*-
 
 host, port = '0.0.0.0', 2010
-largeur, hauteur = 700, 400             # dimensions de l'espace de jeu
+largeur, hauteur = 700, 400
+
+# dimensions de l'espace de jeu
 
 from tkinter import *
 import socket, sys, threading, time
@@ -33,19 +35,19 @@ class ThreadConnexion(threading.Thread):
                 self.app.verrou.release()
                 # fermer le présent thread :
                 break
-            elif deb=='A1' :
+            elif deb=='11' :
                 self.app.verrou.acquire()
                 message = "touché"
                 self.app.conn_client[nom].send(message.encode("Utf8"))
                 self.app.verrou.release()
-            elif deb=='A2' :
+            elif deb=='22' :
                 self.app.verrou.acquire()
                 for cli in self.app.conn_client:
                     if cli != nom:
                         message = "bateau coulé "
                         self.app.conn_client[cli].send(message.encode("Utf8"))
                 self.app.verrou.release()
-            elif deb=='A3' :
+            elif deb=='33' :
                 self.app.verrou.acquire()
                 message = "a l'eau"
                 self.app.conn_client[nom].send(message.encode("Utf8"))
@@ -58,12 +60,17 @@ class ThreadConnexion(threading.Thread):
         self.app.afficher("Client %s déconnecté.\n" % nom)
         # Le thread se termine ici
 
+
+
+
 class ThreadClients(threading.Thread):
+
     """objet thread gérant la connexion de nouveaux clients"""
     def __init__(self, boss, connex):
         threading.Thread.__init__(self)
         self.boss = boss                # réf. de la fenêtre application
-        self.connex = connex            # réf. du socket initial
+        self.connex = connex
+
 
     def run(self):
         "attente et prise en charge de nouvelles connexions clientes"
@@ -71,20 +78,25 @@ class ThreadClients(threading.Thread):
         #self.boss.afficher(txt)
         self.connex.listen(5)
         # Gestion des connexions demandées par les clients :
+
         while 1:
-            nouv_conn, adresse = self.connex.accept()
-            # Créer un nouvel objet thread pour gérer la connexion :
-            th = ThreadConnexion(self.boss, nouv_conn)
-            th.start()
-            it = th.getName()        # identifiant unique du thread
-            # Mémoriser la connexion dans le dictionnaire :
-            self.boss.enregistrer_connexion(nouv_conn, it)
-            # Afficher :
-            txt = "Client %s connecté, adresse IP %s, port %s.\n" %\
-                   (it, adresse[0], adresse[1])
-            self.boss.afficher(txt)
-            # Commencer le dialogue avec le client :
-            nouv_conn.send("serveur OK".encode("Utf8"))
+            var = self.boss.recupvar()
+            if var !=0 :
+                nouv_conn, adresse = self.connex.accept()
+                var = self.boss.decrevar()
+                print(var)
+                # Créer un nouvel objet thread pour gérer la connexion :
+                th = ThreadConnexion(self.boss, nouv_conn)
+                th.start()
+                it = th.getName()        # identifiant unique du thread
+                # Mémoriser la connexion dans le dictionnaire :
+                self.boss.enregistrer_connexion(nouv_conn, it)
+                # Afficher :
+                txt = "Client %s connecté, adresse IP %s, port %s.\n" %\
+                       (it, adresse[0], adresse[1])
+                self.boss.afficher(txt)
+                # Commencer le dialogue avec le client :
+                nouv_conn.send("serveur OK".encode("Utf8"))
 
 class AppBN(Frame):
     '''Fenêtre principale de l'application'''
@@ -106,17 +118,23 @@ class AppBN(Frame):
 
 
 class AppServeur(AppBN):
+
     """fenêtre principale de l'application (serveur ou client)"""
     def __init__(self, host, port, larg_c, haut_c):
         self.host, self.port = host, port
         AppBN.__init__(self, larg_c, haut_c)
-        self.active =1          # témoin d'activité
+        self.active =1
+        # témoin d'activité
         #self.bind('<Destroy>',self.fermer_threads)
 
 
     def envoyermsg (self):
         for cli in self.conn_client:
             print(cli)
+        self.textlabel.set(0)
+
+
+
 
 
     def specificites(self):
@@ -149,8 +167,10 @@ class AppServeur(AppBN):
                 txt = "Serveur up \n"
                 self.avis.insert(END, txt)
                 # démarrage du thread guettant la connexion des clients :
+                self.textlabel.set(3)
                 self.accueil = ThreadClients(self, connexion)
                 self.accueil.start()
+
     def enregistrer_connexion(self, conn, it):
         "Mémoriser la connexion dans un dictionnaire"
         self.conn_client[it] = conn
@@ -158,6 +178,12 @@ class AppServeur(AppBN):
     def afficher(self, txt):
         "afficher un message dans la zone de texte"
         self.avis.insert(END, txt)
+    def decrevar (self) :
+        self.textlabel.set(int(self.textlabel.get())-1)
+    def recupvar(self):
+        return  int(self.textlabel.get())
+
+
 
 
 if __name__ =='__main__':
