@@ -4,25 +4,49 @@
 import socket
 import select
 
+from collections import namedtuple
+
+
+class case:
+    X = None
+    Y = None
+    etat = None
+
+    def __init__(self, _X, _Y, _etat):
+        X = _X
+        Y = _Y
+        etat = _etat
+
 
 class Bateau:
+    cases = []
 
-    instanceTab = []
+    # case = namedtuple("case", "X" "Y" "state")
+    # cases=
 
     def __init__(self, size, _Xpos=None, _Ypos=None, _rotation=None):
-        self.instanceTab.append(self)
+
         self.size = size
+        self.cases = [case]*size
         self.etat = [1]*size
         self.placeBoat(_Xpos, _Ypos, _rotation)
         # pygame.sprite.Sprite.__init__(self)
         # self.image, self.rect = load_png('ball.png')
 
     def placeBoat(self, _Xpos=None, _Ypos=None, _rotation=None):
+        print("self type is ", type(self))
         self.Xpos = _Xpos-1
         self.Ypos = _Ypos-1
         self.rotation = _rotation
+        if self.rotation == 0:
+            for i in range(0, self.size):
+                self.cases.append(
+                    case((self.Xpos)+i, self.Ypos, self.rotation))
 
-    
+        else:
+            for i in range(0, self.size):
+                self.cases.append(
+                    case(self.Xpos, (self.Ypos)+i, self.rotation))
 
     def __str__(self):
         return "size:{},Xpos:{},Ypos:{},rotation{}".format(self.size, self.Xpos+1, self.Ypos+1, self.rotation)
@@ -64,6 +88,7 @@ class gamePlayer:
 
 class BoardGame:
     listClient = [None]
+    bateauxList = [None]
     size = 0
     boardTab = [0][0]
 
@@ -73,7 +98,7 @@ class BoardGame:
         BoardGame.size = size
 
     def addClient(self, client):
-        self.listClient.append(client)
+        BoardGame.listClient.append(client)
 
   #  def renderAllBoats(self, BoatList):
    #     for boat in BoatList:
@@ -100,6 +125,7 @@ class BoardGame:
                         BoardGame.boardTab[bateau.Ypos][bateau.Xpos +
                                                         i] = caseEtatBateau
                         i = i+1
+                        bateauxList.append(bateau)
                     return 1
         # vertical
         else:
@@ -113,7 +139,7 @@ class BoardGame:
             for i in range(0, bateau.size-1):
                 if BoardGame.boardTab[bateau.Ypos+i][bateau.Xpos] == 1:
                     print("there is another boat here (Pos: X Y)",
-                          bateau.Xpos, bateau.Ypos)
+                          BoardGame.bateau.Xpos, bateau.Ypos)
                     return 0
                 # i = 0
             # Mise des cases à 1
@@ -122,6 +148,7 @@ class BoardGame:
                         BoardGame.boardTab[bateau.Ypos +
                                            i][bateau.Xpos] = caseEtatBateau
                         i = i+1
+                        BoardGame.bateauxList.append(bateau)
                     return 1
 
     def tryAndFoundBoat(xpos, ypos):
@@ -129,11 +156,6 @@ class BoardGame:
             return 1
         else:
             return 0
-
-
-
-
-
 
     def print(self):  # affiche le tableau boardTab a la maniere d'un tableau
         for c in BoardGame.boardTab:
