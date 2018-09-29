@@ -13,12 +13,12 @@ class case:
     etat = None
 
     def __init__(self, _X, _Y, _etat):
-        X = _X
-        Y = _Y
-        etat = _etat
+        self.X = _X
+        self.Y = _Y
+        self.etat = _etat
 
 
-class Bateau:
+class Bateau(case):
     cases = []
 
     # case = namedtuple("case", "X" "Y" "state")
@@ -30,25 +30,23 @@ class Bateau:
         self.cases = [case]*size
         self.etat = [1]*size
         self.placeBoat(_Xpos, _Ypos, _rotation)
-        # pygame.sprite.Sprite.__init__(self)
+        # pygame.sprite.Sprite.__init__(self)s
         # self.image, self.rect = load_png('ball.png')
 
     def placeBoat(self, _Xpos=None, _Ypos=None, _rotation=None):
-        print("self type is ", type(self))
         self.Xpos = _Xpos-1
         self.Ypos = _Ypos-1
         self.rotation = _rotation
         if self.rotation == 0:
-            for i in range(0, self.size):
-                self.cases.append(
-                    case((self.Xpos)+i, self.Ypos, self.rotation))
+            for i in range(0, self.size-1):
+                self.cases.append(case((self.Xpos)+i, self.Ypos, 1))
 
         else:
-            for i in range(0, self.size):
-                self.cases.append(
-                    case(self.Xpos, (self.Ypos)+i, self.rotation))
+            for i in range(0, self.size-1):
+                self.cases.append(case(self.Xpos, (self.Ypos)+i, 1))
 
     def __str__(self):
+
         return "size:{},Xpos:{},Ypos:{},rotation{}".format(self.size, self.Xpos+1, self.Ypos+1, self.rotation)
 
 
@@ -87,8 +85,8 @@ class gamePlayer:
 
 
 class BoardGame:
-    listClient = [None]
-    bateauxList = [None]
+    listClient = []
+    bateauxList = []
     size = 0
     boardTab = [0][0]
 
@@ -115,7 +113,7 @@ class BoardGame:
             for i in range(0, bateau.size-1):
                 if BoardGame.boardTab[bateau.Ypos][bateau.Xpos+i] == 1:
                     print("there is another boat here (Pos: X Y)",
-                          bateau.Xpos+1, bateau.Ypos+1)
+                          BoardGame.bateau.Xpos+1, bateau.Ypos+1)
                     return 0
 
             # i = 0
@@ -125,7 +123,7 @@ class BoardGame:
                         BoardGame.boardTab[bateau.Ypos][bateau.Xpos +
                                                         i] = caseEtatBateau
                         i = i+1
-                        bateauxList.append(bateau)
+                    BoarGame.bateauxList.append(bateau)
                     return 1
         # vertical
         else:
@@ -148,7 +146,8 @@ class BoardGame:
                         BoardGame.boardTab[bateau.Ypos +
                                            i][bateau.Xpos] = caseEtatBateau
                         i = i+1
-                        BoardGame.bateauxList.append(bateau)
+
+                    BoardGame.bateauxList.append(bateau)
                     return 1
 
     def tryAndFoundBoat(xpos, ypos):
@@ -156,6 +155,13 @@ class BoardGame:
             return 1
         else:
             return 0
+
+    def aQuelBateauxEstCetteCase(_X, _Y):
+        for bateau in BoardGame.bateauxList:
+            for acase in bateau.cases:
+                if (acase.X == _X-1) & (acase.Y == _Y-1):
+                    return bateau
+        return 0
 
     def print(self):  # affiche le tableau boardTab a la maniere d'un tableau
         for c in BoardGame.boardTab:

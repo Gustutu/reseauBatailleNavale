@@ -24,8 +24,13 @@ while again == 'ok':
     gameMaster.tryAddBoat(BatNav.Bateau(
         int(taille), int(posX), int(posY), int(orientation)))
     again = input("Voulez vous faire un autre bateau (ok/no) ? ")
+
+    print(BatNav.BoardGame.bateauxList)
     i = i+1
 
+
+print("bateaux a cette emplacement :",
+      BatNav.BoardGame.aQuelBateauxEstCetteCase(3, 3))
 
 print(gameMaster)
 
