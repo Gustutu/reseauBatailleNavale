@@ -3,7 +3,7 @@
 from tkinter import *
 import socket, sys, threading, time
 from Serveur import AppServeur
-host, port = '127.0.0.1', 2010
+host, port = '0.0.0.0', 2010
 largeur, hauteur = 700, 400
 COTE=400
 NB_DE_CASES=10
@@ -18,13 +18,21 @@ class ThreadSocket(threading.Thread):
         self.app = boss            # réf. de la fenêtre application
         # Mise en place du socket - connexion avec le  serveur :
         self.connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
         try:
             self.connexion.connect((host, port))
-        except socket.error as e:
-            print(e,"La connexion a échoué.")
+        except socket.error:
+            print("La connexion a échoué.")
             sys.exit()
         print("Connexion établie avec le serveur.")
-
+    def id(self):
+        login = input("login :")
+        mdp = input("mdp:")
+        self.connexion.send(login.encode("Utf8") + mdp.encode("Utf8"))
+        msg_recu = self.connexion.recv(1024).decode("Utf8")
+        if msg_recu == 'wrong login':
+            print("wrong login")
+            return True
     def run(self):
         while 1:
             msg_recu = self.connexion.recv(1024).decode("Utf8")
@@ -40,6 +48,7 @@ class ThreadSocket(threading.Thread):
         # Le thread <réception> se termine ici.
         print("Client arrêté. Connexion interrompue.")
         self.connexion.close()
+
     def envoie_msg(self,msg):
         print("tir")
         self.connexion.send(msg.encode("Utf8"))
@@ -54,12 +63,14 @@ class AppClient(AppServeur):
 
     def Clic(self,evt):
         # position du pointeur de la souris
-        self.jeu.create_rectangle(MARGE + self.CX * PAS, MARGE + self.CY * PAS, PAS + MARGE + self.CX * PAS, PAS + MARGE + self.CY * PAS, outline='black')
+        if ((self.CX < NB_DE_CASES ) and (self.CY < NB_DE_CASES )):
+            self.jeu.create_rectangle(MARGE + self.CX * PAS, MARGE + self.CY * PAS, PAS + MARGE + self.CX * PAS, PAS + MARGE + self.CY * PAS, outline='black')
         self.CX =float(evt.x)//PAS
         self.CY =float(evt.y)//PAS
         print(self.CX,self.CY)
-        self.jeu.create_rectangle(MARGE + self.CX * PAS, MARGE + self.CY * PAS, PAS + MARGE + self.CX * PAS, PAS + MARGE + self.CY * PAS, outline='red')
-        self.textlabel.set(str(int(self.CX))+str(int(self.CY)))
+        if ((self.CX < NB_DE_CASES ) and (self.CY < NB_DE_CASES )):
+            self.jeu.create_rectangle(MARGE + self.CX * PAS, MARGE + self.CY * PAS, PAS + MARGE + self.CX * PAS, PAS + MARGE + self.CY * PAS, outline='red')
+            self.textlabel.set(str(int(self.CX))+str(int(self.CY)))
 
 
 
@@ -77,12 +88,20 @@ class AppClient(AppServeur):
 
         self.master.title('<<< Client >>>')
         self.connex =ThreadSocket(self, self.host, self.port)
+
+        if(self.connex.id() == True ) :
+            self.destroy()
+            self.quit()
+            exit()
         self.connex.start()
         self.id =None
 
 
     def envoyermsg(self):
         self.connex.envoie_msg(str(int(self.CX))+str(int(self.CY)))
+
+
+
 
 
 
