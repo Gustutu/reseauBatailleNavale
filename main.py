@@ -64,6 +64,7 @@ Y = input("Maintenant la seconde coordonnée ")
 
 X = int(X)
 Y = int(Y)
+
 gamePlayer.tryFoundBoat(X, Y)
 
 #print ("".join(str(boardGame.boardTab)))

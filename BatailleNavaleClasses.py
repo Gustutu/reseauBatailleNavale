@@ -30,6 +30,7 @@ class Bateau(case):
         self.cases = [case]*size
         self.etat = [1]*size
         self.placeBoat(_Xpos, _Ypos, _rotation)
+        self.enVie = 1
         # pygame.sprite.Sprite.__init__(self)s
         # self.image, self.rect = load_png('ball.png')
 
@@ -152,6 +153,12 @@ class BoardGame:
 
     def tryAndFoundBoat(xpos, ypos):
         if BoardGame.boardTab[xpos-1][ypos-1] == 1:
+            bateau=BoardGame.aQuelBateauxEstCetteCase(xpos, ypos)
+            for case in bateau.cases:
+                print("case du bateau")
+                print(case.etat)
+            if bateau.etat == 0:
+                return 2
             return 1
         else:
             return 0
@@ -161,6 +168,7 @@ class BoardGame:
             for acase in bateau.cases:
                 if (acase.X == _X-1) & (acase.Y == _Y-1):
                     return bateau
+
         return 0
 
     def print(self):  # affiche le tableau boardTab a la maniere d'un tableau
