@@ -3,8 +3,9 @@
 # utilisation de set pour list de bateau par client
 import socket
 import select
-
+import weakref
 from collections import namedtuple
+import pprint
 
 
 class case:
@@ -12,10 +13,22 @@ class case:
     Y = None
     etat = None
 
-    def __init__(self, _X, _Y, _etat):
+    def __init__(self, _X, _Y, _etat, _parent):
+        self.parent = _parent
         self.X = _X
         self.Y = _Y
         self.etat = _etat
+
+    def setEtatCase(self, _etat):
+        self.etat = _etat
+        # print("any case alive?", any(case.etat == 1 for case in self.parent.cases))
+        if not(any(case.etat == 1 for case in self.parent.cases)):
+            self.parent.enVie = False
+            print("boat is dead")
+
+        if not(any(bateau.enVie == 1 for bateau in gameManager.Boats)):
+            print("end of game all boats dead")
+            gameManager.endOfGame = True
 
 
 class Bateau(case):
@@ -27,7 +40,8 @@ class Bateau(case):
     def __init__(self, size, _Xpos=None, _Ypos=None, _rotation=None):
 
         self.size = size
-        self.cases = [case]*size
+        self.cases = []
+        print("nbcases here", len(self.cases))
         self.etat = [1]*size
         self.placeBoat(_Xpos, _Ypos, _rotation)
         self.enVie = 1
@@ -39,22 +53,28 @@ class Bateau(case):
         self.Ypos = _Ypos-1
         self.rotation = _rotation
         if self.rotation == 0:
-            for i in range(0, self.size-1):
-                self.cases.append(case((self.Xpos)+i, self.Ypos, 1))
+            for i in range(0, self.size):
+                print("adding case", i)
+                self.cases.append(case((self.Xpos)+i, self.Ypos, 1, self))
 
         else:
-            for i in range(0, self.size-1):
-                self.cases.append(case(self.Xpos, (self.Ypos)+i, 1))
+            for i in range(0, self.size):
+                self.cases.append(case(self.Xpos, (self.Ypos)+i, 1, self))
 
     def __str__(self):
 
         return "size:{},Xpos:{},Ypos:{},rotation{}".format(self.size, self.Xpos+1, self.Ypos+1, self.rotation)
 
 
-class gameMaster:
+class gameManager:
+
+    Boats = []
+    endOfGame = False
+
     def __init__(self, name):
         self.name = name
-        self.Boats = []
+        self.playerList = []
+        self.numberOfPlayer = None
 
     def tryAddBoat(self, boat):
         if BoardGame.tryAndAddBoat(boat) == 1:
@@ -67,22 +87,23 @@ class gameMaster:
             toreturn += str(boat)+"\n"
         return "nom:{} \n {}".format(self.name, toreturn)
 
+    def addPlayer(self, _name):
+        playerList.addPlayer
+
 
 class gamePlayer:
     def __init__(self, name):
         self.name = name
 
-    def tryFoundBoat(self, Xpos, Ypos):
-        if BoardGame.tryAndFoundBoat(Xpos, Ypos) == 1:
+    def shoot(self, Xpos, Ypos):
+        if BoardGame.handlePlayerShot(Xpos, Ypos) == 1:
             print("Touché", Xpos, Ypos)
+        elif BoardGame.handlePlayerShot(Xpos, Ypos) == 2:
+            print("Coulé", Xpos, Ypos)
+        elif BoardGame.handlePlayerShot(Xpos, Ypos) == 0:
+            print("Loupé", Xpos, Ypos)
         else:
-            if BoardGame.tryAndFoundBoat(Xpos, Ypos) == 2:
-                print("Coulé", Xpos, Ypos)
-            else:
-                if BoardGame.tryAndFoundBoat(Xpos, Ypos) == 0:
-                    print("Loupé", Xpos, Ypos)
-                else:
-                    print("Error")
+            print("Error")
 
 
 class BoardGame:
@@ -95,9 +116,6 @@ class BoardGame:
         # creation d'un tableau 2D de zeros de taille size
         BoardGame.boardTab = [[0] * size for _ in range(size)]
         BoardGame.size = size
-
-    def addClient(self, client):
-        BoardGame.listClient.append(client)
 
   #  def renderAllBoats(self, BoatList):
    #     for boat in BoatList:
@@ -114,7 +132,7 @@ class BoardGame:
             for i in range(0, bateau.size-1):
                 if BoardGame.boardTab[bateau.Ypos][bateau.Xpos+i] == 1:
                     print("there is another boat here (Pos: X Y)",
-                          BoardGame.bateau.Xpos+1, bateau.Ypos+1)
+                          bateau.Xpos+1, bateau.Ypos+1)
                     return 0
 
             # i = 0
@@ -124,7 +142,7 @@ class BoardGame:
                         BoardGame.boardTab[bateau.Ypos][bateau.Xpos +
                                                         i] = caseEtatBateau
                         i = i+1
-                    BoarGame.bateauxList.append(bateau)
+                    BoardGame.bateauxList.append(bateau)
                     return 1
         # vertical
         else:
@@ -138,7 +156,7 @@ class BoardGame:
             for i in range(0, bateau.size-1):
                 if BoardGame.boardTab[bateau.Ypos+i][bateau.Xpos] == 1:
                     print("there is another boat here (Pos: X Y)",
-                          BoardGame.bateau.Xpos, bateau.Ypos)
+                          bateau.Xpos, bateau.Ypos)
                     return 0
                 # i = 0
             # Mise des cases à 1
@@ -151,15 +169,22 @@ class BoardGame:
                     BoardGame.bateauxList.append(bateau)
                     return 1
 
-    def tryAndFoundBoat(xpos, ypos):
-        if BoardGame.boardTab[xpos-1][ypos-1] == 1:
-            bateau=BoardGame.aQuelBateauxEstCetteCase(xpos, ypos)
-            for case in bateau.cases:
-                print("case du bateau")
-                print(case.etat)
-            if bateau.etat == 0:
+    def handlePlayerShot(xpos, ypos):
+        print("etat boardtab:", "x:", xpos, "y", ypos,
+              BoardGame.boardTab[ypos-1][xpos-1])
+        if BoardGame.boardTab[ypos-1][xpos-1] == 1:
+            BoardGame.boardTab[ypos-1][xpos-1] = 0
+            bateau = BoardGame.aQuelBateauxEstCetteCase(xpos, ypos)
+            print("nb case", len(bateau.cases))
+            for acase in bateau.cases:
+                pprint.pprint(acase)
+                if((acase.X == xpos-1) & (acase.Y == ypos-1)):
+                    acase.setEtatCase(0)
+                    return 1
+
+            if bateau.enVie == 0:
                 return 2
-            return 1
+
         else:
             return 0
 

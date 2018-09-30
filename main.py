@@ -12,31 +12,28 @@ boardGame = BatNav.BoardGame(10)
 
 
 name = input("Quel est ton nom? ")
-gameMaster = BatNav.gameMaster(name)
+gameManager = BatNav.gameManager(name)
+gameManager.numberOfPlayer = input("combien ya t il de joueurs? ")
+
+
 again = 'ok'
-i = 0
 
 while again == 'ok':
     taille = input("Quelle taille fait votre bateau? ")
     posX = input("Quelle coordonnée X ? ")
     posY = input("Quelle coordonnée Y ? ")
     orientation = input("Quelle orientation (horizontal=0/vertical=1)? ")
-    gameMaster.tryAddBoat(BatNav.Bateau(
+    gameManager.tryAddBoat(BatNav.Bateau(
         int(taille), int(posX), int(posY), int(orientation)))
     again = input("Voulez vous faire un autre bateau (ok/no) ? ")
 
-    print(BatNav.BoardGame.bateauxList)
-    i = i+1
+    print("nb de case", len(BatNav.BoardGame.bateauxList[0].cases))
 
-
-print("bateaux a cette emplacement :",
-      BatNav.BoardGame.aQuelBateauxEstCetteCase(3, 3))
-
-print(gameMaster)
+print(gameManager)
 
 boardGame.print()
 
-time.sleep(5)
+time.sleep(1)
 print(".")
 print(".")
 print(".")
@@ -59,13 +56,17 @@ gamePlayer = BatNav.gamePlayer(name)
 
 print("Bonjour", name)
 
-X = input("Rentrez la première coordonnée ")
-Y = input("Maintenant la seconde coordonnée ")
 
-X = int(X)
-Y = int(Y)
+while not(gameManager.endOfGame):
+    X = input("Rentrez la première coordonnée ")
+    Y = input("Maintenant la seconde coordonnée ")
 
-gamePlayer.tryFoundBoat(X, Y)
+    X = int(X)
+    Y = int(Y)
+
+    gamePlayer.shoot(X, Y)
+    boardGame.print()
+    print("end of game in main", gameManager.endOfGame)
 
 #print ("".join(str(boardGame.boardTab)))
 
