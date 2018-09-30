@@ -1,5 +1,5 @@
 import time
-import BatailleNavaleClasses as BatNav
+from socketLab import BatailleNavaleClasses as BatNav
 
 SIZE: int = 10
 

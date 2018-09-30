@@ -1,11 +1,8 @@
 # -*- coding:Utf8 -*-
 from tkinter import *
 import socket
-import sys
 import threading
-import time
-import BatailleNavaleClasses as BatNav
-
+from socketLab import BatailleNavaleClasses as BatNav
 
 host, port = '0.0.0.0', 2010
 largeur, hauteur = 700, 400
@@ -23,47 +20,6 @@ class ThreadConnexion(threading.Thread):
 
         # réf. de la fenêtre application
 
-    def run(self):
-        "actions entreprises en réponse aux messages reçus du client"
-        nom = self.getName()            # id. du client = nom du thread
-        while 1:
-            msgClient = self.connexion.recv(1024).decode("Utf8")
-            print("**{}** de {}".format(msgClient, nom))
-            deb = msgClient.split(',')[0]
-            if deb == "fin" or deb == "":
-                self.app.enlever_canon(nom)
-                # signaler le départ de ce canon aux autres clients :
-                self.app.verrou.acquire()
-                for cli in self.app.conn_client:
-                    if cli != nom:
-                        message = "départ_de,{}".format(nom)
-                        self.app.conn_client[cli].send(message.encode("Utf8"))
-                self.app.verrou.release()
-                # fermer le présent thread :
-                break
-            elif deb == '11':
-                self.app.verrou.acquire()
-                message = "touché"
-                self.app.conn_client[nom].send(message.encode("Utf8"))
-                self.app.verrou.release()
-            elif deb == '22':
-                self.app.verrou.acquire()
-                for cli in self.app.conn_client:
-                    if cli != nom:
-                        message = "bateau coulé "
-                        self.app.conn_client[cli].send(message.encode("Utf8"))
-                self.app.verrou.release()
-            elif deb == '33':
-                self.app.verrou.acquire()
-                message = "a l'eau"
-                self.app.conn_client[nom].send(message.encode("Utf8"))
-                self.app.verrou.release()
-
-        # Fermeture de la connexion :
-        self.connexion.close()          # couper la connexion
-        del self.app.conn_client[nom]   # suppr. sa réf. dans le dictionn.
-        self.app.afficher("Client %s déconnecté.\n" % nom)
-        # Le thread se termine ici
 
     def veriflogin(self):
         msgClient = self.connexion.recv(1024).decode("Utf8")
@@ -85,6 +41,7 @@ class ThreadClients(threading.Thread):
         threading.Thread.__init__(self)
         self.boss = boss                # réf. de la fenêtre application
         self.connex = connex
+        self.connexion = []
 
     def run(self):
         "attente et prise en charge de nouvelles connexions clientes"
@@ -92,8 +49,8 @@ class ThreadClients(threading.Thread):
         # self.boss.afficher(txt)
         self.connex.listen(5)
         # Gestion des connexions demandées par les clients :
-
-        while 1:
+        co = 1
+        while co:
             var = self.boss.recupvar()
             if var != 0:
                 nouv_conn, adresse = self.connex.accept()
@@ -101,9 +58,10 @@ class ThreadClients(threading.Thread):
                 th = ThreadConnexion(self.boss, nouv_conn)
                 if th.veriflogin() == True:
                     var = self.boss.decrevar()
-                    th.start()
+                    #th.start()
                     it = th.getName()        # identifiant unique du thread
                     # Mémoriser la connexion dans le dictionnaire :
+                    self.connexion.append(nouv_conn)
                     self.boss.enregistrer_connexion(nouv_conn, it)
                     # Afficher :
                     txt = "Client %s connecté, adresse IP %s, port %s.\n" %\
@@ -116,7 +74,14 @@ class ThreadClients(threading.Thread):
                     th.closeth()
             else:
                 self.boss.initjeux()
+                co = 0
+                self.boss.joueur()
 
+    def returncoor(self):
+        print( "hello")
+        msgClient = self.connexion[1].recv(1024).decode("Utf8")
+        print("zgeg : " + msgClient)
+        return msgClient
 
 class AppBN(Frame):
     '''Fenêtre principale de l'application'''
@@ -138,6 +103,8 @@ class AppBN(Frame):
 
 
 class AppServeur(AppBN):
+    gameMaster = None
+    boardGame = None
 
     """fenêtre principale de l'application (serveur ou client)"""
 
@@ -183,7 +150,7 @@ class AppServeur(AppBN):
             txt = "Serveur up \n"
             self.avis.insert(END, txt)
             # démarrage du thread guettant la connexion des clients :
-            self.textlabel.set(2)
+            self.textlabel.set(input("nb de joueur ?"))
             self.accueil = ThreadClients(self, connexion)
             self.accueil.start()
 
@@ -228,6 +195,10 @@ class AppServeur(AppBN):
         print(gameMaster)
 
         boardGame.print()
+
+    def joueur(self):
+        msgClient = self.accueil.returncoor()
+      #jeux
 
 
 if __name__ == '__main__':
