@@ -77,8 +77,11 @@ class gameManager:
         self.numberOfPlayer = None
 
     def tryAddBoat(self, boat):
-        if BoardGame.tryAndAddBoat(boat) == 1:
+        val = BoardGame.tryAndAddBoat(boat)
+        if val == 1:
             self.Boats.append(boat)
+        return val
+
 
     def __str__(self):
 

@@ -26,6 +26,7 @@ class ThreadConnexion(threading.Thread):
 
     def initial(self):
         msgClient = self.connexion.recv(1024).decode("Utf8")
+        print("intiale = " + msgClient)
         tab = msgClient.split(";")
         self.x = tab[0]
         self.y = tab[1]
@@ -44,11 +45,14 @@ class ThreadConnexion(threading.Thread):
         return self.horiverti
     def getadd(self):
         return  self.add
-    def envoyermsq(self,bool):
-        if bool == True :
+    def envoyermsq(self,num):
+        if num == 1 :
             self.connexion.send("OK".encode("Utf8"))
-        elif bool == False :
-            self.connexion.send("NOK".encode("Utf8"))
+        elif num == 0:
+            self.connexion.send("NNNN".encode("Utf8"))
+        elif num == 2:
+            self.connexion.send("Start".encode("Utf8"))
+
 
         # réf. de la fenêtre application
 
@@ -229,6 +233,7 @@ class AppServeur(AppBN):
         return int(self.textlabel.get())
 
     def initjeuxihm(self):
+        self.accueil.admin.envoyermsq(2)
         boardGame = BatNav.BoardGame(10)
 
         gameMaster = BatNav.gameManager("name")
@@ -236,10 +241,13 @@ class AppServeur(AppBN):
         while jeux == 1 :
             self.accueil.admin.initial()
             print(str(self.accueil.admin.gettaille()) + str(self.accueil.admin.getx()) + str(self.accueil.admin.gety()) + str(self.accueil.admin.gethoriverti()))
-            if gameMaster.tryAddBoat(BatNav.Bateau(int(self.accueil.admin.gettaille()), int(self.accueil.admin.getx()), int(self.accueil.admin.gety()), int(self.accueil.admin.gethoriverti()))) == 1 :
-                self.accueil.admin.envoyermsq(True)
+            val = gameMaster.tryAddBoat(BatNav.Bateau(int(self.accueil.admin.gettaille()), int(self.accueil.admin.getx()),
+                                                int(self.accueil.admin.gety()), int(self.accueil.admin.gethoriverti())))
+            print("val : " + str(val))
+            if val == 1 :
+                self.accueil.admin.envoyermsq(1)
             else :
-                self.accueil.admin.envoyermsq(False)
+                self.accueil.admin.envoyermsq(0)
             boardGame.print()
             print(self.accueil.admin.getadd())
             if int(self.accueil.admin.getadd()) == 0 :
@@ -248,9 +256,6 @@ class AppServeur(AppBN):
         print(gameMaster)
         boardGame.print()
     def initjeux(self):
-        # petitBateau = BatNav.Bateau(3, 6, 6, 0)
-        # moyenBateau = BatNav.Bateau(4, 2, 2, 1)
-        # grandBateau = BatNav.Bateau(5, 2, 7, 0)
         boardGame = BatNav.BoardGame(10)
 
         # hugo=BatNav.client("Hugo")

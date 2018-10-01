@@ -25,11 +25,15 @@ class ThreadSocket(threading.Thread):
             print("La connexion a échoué.")
             sys.exit()
         print("Connexion établie avec le serveur.")
+
     def id(self,mdp,login):
         self.connexion.send(login.encode("Utf8") + mdp.encode("Utf8"))
         msg_recu = self.connexion.recv(1024).decode("Utf8")
         if msg_recu == 'wrong login':
             print("wrong login")
+            return True
+        elif  msg_recu == "L'admin n'est pas encore connecté":
+            print("L'admin n'est pas encore connecté")
             return True
     def run(self):
         while 1:
@@ -54,7 +58,7 @@ class ThreadSocket(threading.Thread):
                 self.app.dessiner(cx - 1, cy - 1, message)
 
         # Le thread <réception> se termine ici.
-        print("Client arrêté. Connexion interrompue.")
+
         self.connexion.close()
 
     def envoie_msg(self,msg):
@@ -81,7 +85,7 @@ class AppAdmin(AppServeur) :
         self.jeu.bind("<Button-1>", self.Clic)
         self.texttour = StringVar()
         self.lab = Label(self, textvariable=self.texttour)
-        self.texttour.set("Debut")
+        self.texttour.set("Attendre la connexion des clients")
         self.lab.pack(side=BOTTOM, padx=5, pady=7)
         self.oui = Button(self, text="OUI", command=self.envoyeroui)
         self.oui.pack(side=BOTTOM, padx=7, pady=8)
@@ -111,93 +115,123 @@ class AppAdmin(AppServeur) :
             self.destroy()
             self.quit()
             exit()
+        msg_recu = self.connex.recoie_msg()
+        if msg_recu == "Start" :
+            self.texttour.set("Debut")
         self.id =None
 
     def envoyeroui(self):
-         #self.connex.envoie_msg("OUI")
-         self.texttour.set("Debut")
-         self.connex.envoie_msg(str(int(self.debutX)) + ";" + str(int(self.debutY)) + ";" + str(self.horiverti) + ";" + str(self.taille) + ";" + "1")
-         msg_recu = self.connex.recoie_msg()
-         if msg_recu == 'NOK' :
-             if self.debutX >= self.finX:
-                 for case in range(self.finX, self.debutX + 1):
-                     self.jeu.create_rectangle(MARGE + (case - 1) * PAS, MARGE + (self.debutY - 1) * PAS,
-                                               PAS + MARGE + (case - 1) * PAS, PAS + MARGE + (self.debutY - 1) * PAS,
-                                               fill='ivory',outline='black')
-             elif self.debutX < self.finX:
-                 for case in range(self.debutX, self.finX + 1):
-                     self.jeu.create_rectangle(MARGE + (case - 1) * PAS, MARGE + (self.debutY - 1) * PAS,
-                                               PAS + MARGE + (case - 1) * PAS, PAS + MARGE + (self.debutY - 1) * PAS,
-                                               fill='ivory',outline='black')
-         elif self.horiverti == 1:
-             if self.debutY >= self.finY:
-                 for case in range(self.finY, self.debutY + 1):
-                     self.jeu.create_rectangle(MARGE + (self.debutX - 1) * PAS, MARGE + (case - 1) * PAS,
-                                               PAS + MARGE + (self.debutX - 1) * PAS, PAS + MARGE + (case - 1) * PAS,
-                                               fill='ivory',outline='black')
+        if self.texttour.get() == "Voulez vous ajouter un bateau?" :
+             #self.connex.envoie_msg("OUI")
+             self.texttour.set("Debut")
+             if (self.horiverti == 1 and self.debutY > self.finY):
+                 self.connex.envoie_msg(
+                     str(int(self.finX)) + ";" + str(int(self.finY)) + ";" + str(self.horiverti) + ";" + str(
+                         self.taille) + ";" + "1")
+             elif self.horiverti == 0 and self.debutX > self.finX:
+                 self.connex.envoie_msg(
+                     str(int(self.finX)) + ";" + str(int(self.finY)) + ";" + str(self.horiverti) + ";" + str(
+                         self.taille) + ";" + "1")
+             else:
+                self.connex.envoie_msg(str(int(self.debutX)) + ";" + str(int(self.debutY)) + ";" + str(self.horiverti) + ";" + str(self.taille) + ";" + "1")
+             msg_recu = self.connex.recoie_msg()
+             print("message = " + msg_recu)
+             if msg_recu == 'OK' :
+                 if self.horiverti == 0:
+                     if self.debutX >= self.finX:
+                         for case in range(self.finX, self.debutX + 1):
+                             self.jeu.create_rectangle(MARGE + (case - 1) * PAS, MARGE + (self.debutY - 1) * PAS,
+                                                       PAS + MARGE + (case - 1) * PAS, PAS + MARGE + (self.debutY - 1) * PAS,
+                                                       fill='red',outline='black')
+                     elif self.debutX < self.finX:
+                         for case in range(self.debutX, self.finX + 1):
+                             self.jeu.create_rectangle(MARGE + (case - 1) * PAS, MARGE + (self.debutY - 1) * PAS,
+                                                       PAS + MARGE + (case - 1) * PAS, PAS + MARGE + (self.debutY - 1) * PAS,
+                                                       fill='red',outline='black')
+                 elif self.horiverti == 1:
+                     if self.debutY >= self.finY:
+                         for case in range(self.finY, self.debutY + 1):
+                             self.jeu.create_rectangle(MARGE + (self.debutX - 1) * PAS, MARGE + (case - 1) * PAS,
+                                                       PAS + MARGE + (self.debutX - 1) * PAS, PAS + MARGE + (case - 1) * PAS,
+                                                       fill='red',outline='black')
 
-             elif self.debutY < self.finY:
-                 for case in range(self.debutY, self.finY + 1):
-                     self.jeu.create_rectangle(MARGE + (self.debutX - 1) * PAS, MARGE + (case - 1) * PAS,
-                                               PAS + MARGE + (self.debutX - 1) * PAS, PAS + MARGE + (case - 1) * PAS,
-                                               fill='ivory',outline='black')
+                     elif self.debutY < self.finY:
+                         for case in range(self.debutY, self.finY + 1):
+                             self.jeu.create_rectangle(MARGE + (self.debutX - 1) * PAS, MARGE + (case - 1) * PAS,
+                                                       PAS + MARGE + (self.debutX - 1) * PAS, PAS + MARGE + (case - 1) * PAS,
+                                                       fill='red',outline='black')
 
 
 
     def envoyernon(self):
-        # self.connex.envoie_msg("NON")
-        self.texttour.set("Fin de l'initialisation")
-        self.connex.envoie_msg(str(int(self.debutX)) + ";" + str(int(self.debutY)) + ";" + str(self.horiverti) + ";" + str( self.taille) + ";" + "0")
-        msg_recu = self.connex.recoie_msg()
-        print(msg_recu)
+        if self.texttour.get() == "Voulez vous ajouter un bateau?":
+            # self.connex.envoie_msg("NON")
+            self.texttour.set("Fin de l'initialisation")
+            if (self.horiverti == 1 and self.debutY > self.finY) :
+                self.connex.envoie_msg(
+                    str(int(self.finX)) + ";" + str(int(self.finY)) + ";" + str(self.horiverti) + ";" + str(
+                        self.taille) + ";" + "0")
+            elif self.horiverti == 0 and self.debutX > self.finX :
+                self.connex.envoie_msg(
+                    str(int(self.finX)) + ";" + str(int(self.finY)) + ";" + str(self.horiverti) + ";" + str(
+                        self.taille) + ";" + "0")
+            else :
+                self.connex.envoie_msg(str(int(self.debutX)) + ";" + str(int(self.debutY)) + ";" + str(self.horiverti) + ";" + str( self.taille) + ";" + "0")
+            msg_recu = self.connex.recoie_msg()
+            print(msg_recu)
+            if msg_recu == 'OK':
+                if self.horiverti == 0:
+                    if self.debutX >= self.finX:
+                        for case in range(self.finX, self.debutX + 1):
+                            self.jeu.create_rectangle(MARGE + (case - 1) * PAS, MARGE + (self.debutY - 1) * PAS,
+                                                      PAS + MARGE + (case - 1) * PAS, PAS + MARGE + (self.debutY - 1) * PAS,
+                                                      fill='red', outline='black')
+                    elif self.debutX < self.finX:
+                        for case in range(self.debutX, self.finX + 1):
+                            self.jeu.create_rectangle(MARGE + (case - 1) * PAS, MARGE + (self.debutY - 1) * PAS,
+                                                      PAS + MARGE + (case - 1) * PAS, PAS + MARGE + (self.debutY - 1) * PAS,
+                                                      fill='red', outline='black')
+                elif self.horiverti == 1:
+                    if self.debutY >= self.finY:
+                        for case in range(self.finY, self.debutY + 1):
+                            self.jeu.create_rectangle(MARGE + (self.debutX - 1) * PAS, MARGE + (case - 1) * PAS,
+                                                      PAS + MARGE + (self.debutX - 1) * PAS, PAS + MARGE + (case - 1) * PAS,
+                                                      fill='red', outline='black')
+
+                    elif self.debutY < self.finY:
+                        for case in range(self.debutY, self.finY + 1):
+                            self.jeu.create_rectangle(MARGE + (self.debutX - 1) * PAS, MARGE + (case - 1) * PAS,
+                                                      PAS + MARGE + (self.debutX - 1) * PAS, PAS + MARGE + (case - 1) * PAS,
+                                                      fill='red', outline='black')
 
     def envoyermsg(self):
-        if self.texttour.get() == "Debut" :
-            self.debutX = int(self.CX) +1
-            self.debutY = int(self.CY) +1
-            print("debut : " + str(self.debutX) + str(self.debutY))
-            self.texttour.set("Fin")
-        elif self.texttour.get() == "Fin" :
-            self.finX = int(self.CX)+1
-            self.finY = int(self.CY)+1
-            print("fin : " + str(self.finX) + str(self.finY))
-            if self.debutX == self.finX :
-                self.horiverti = 1
-            elif self.debutY == self.finY :
-                self.horiverti = 0
-
-            if self.horiverti == 0 :
-                if self.debutX >= self.finX :
-                   self.taille =  (self.debutX - self.finX)+1
-                   for case in range(self.finX,self.debutX+1) :
-                       self.jeu.create_rectangle(MARGE + (case -1) * PAS , MARGE + (self.debutY-1) * PAS ,
-                                                 PAS + MARGE + (case-1) * PAS, PAS + MARGE + (self.debutY-1) * PAS ,
-                                                 fill='red')
-                elif self.debutX < self.finX :
-                    self.taille = (self.finX - self.debutX) +1
-                    for case in range(self.debutX, self.finX+1):
-                        self.jeu.create_rectangle(MARGE + (case - 1) * PAS, MARGE + (self.debutY - 1) * PAS,
-                                                  PAS + MARGE + (case - 1) * PAS, PAS + MARGE + (self.debutY - 1) * PAS,
-                                                  fill='red')
-            elif self.horiverti == 1:
-                if self.debutY >= self.finY :
-                   self.taille =  self.debutY - self.finY + 1
-                   for case in range(self.finY, self.debutY + 1):
-                       self.jeu.create_rectangle(MARGE + (self.debutX - 1) * PAS, MARGE + (case - 1) * PAS,
-                                                 PAS + MARGE + (self.debutX - 1) * PAS, PAS + MARGE + (case - 1) * PAS,
-                                                 fill='blue')
-
-                elif self.debutY < self.finY:
-                    self.taille = self.finY - self.debutY + 1
-                    for case in range(self.debutY, self.finY + 1):
-                        self.jeu.create_rectangle(MARGE + (self.debutX - 1) * PAS, MARGE + (case - 1) * PAS,
-                                                  PAS + MARGE + (self.debutX - 1) * PAS, PAS + MARGE + (case - 1) * PAS,
-                                                  fill='blue')
-
-            self.connex.envoie_msg(str(int(self.debutX)) +";"+ str(int(self.debutY)) +";"+ str(self.horiverti) +";"+ str(self.taille)+";"+"1")
-            print(str(int(self.debutX)) + str(int(self.debutY)) + str(self.horiverti) + str(self.taille))
-
-            self.texttour.set("Voulez vous ajouter un bateau?")
+        if  self.texttour.get() != "Attendre la connexion des clients" :
+            if self.texttour.get() == "Debut" :
+                self.debutX = int(self.CX) +1
+                self.debutY = int(self.CY) +1
+                print("debut : " + str(self.debutX) + str(self.debutY))
+                self.texttour.set("Fin")
+            elif self.texttour.get() == "Fin" :
+                self.finX = int(self.CX)+1
+                self.finY = int(self.CY)+1
+                print("fin : " + str(self.finX) + str(self.finY))
+                if self.debutX == self.finX :
+                    self.horiverti = 1
+                elif self.debutY == self.finY :
+                    self.horiverti = 0
+                if self.horiverti == 0 :
+                    if self.debutX >= self.finX :
+                       self.taille =  (self.debutX - self.finX)+1
+                    elif self.debutX < self.finX :
+                        self.taille = (self.finX - self.debutX) +1
+                elif self.horiverti == 1:
+                    if self.debutY >= self.finY :
+                       self.taille =  self.debutY - self.finY + 1
+                    elif self.debutY < self.finY:
+                        self.taille = self.finY - self.debutY + 1
+                #self.connex.envoie_msg(str(int(self.debutX)) +";"+ str(int(self.debutY)) +";"+ str(self.horiverti) +";"+ str(self.taille)+";"+"1")
+                print(str(int(self.debutX)) + str(int(self.debutY)) + str(self.horiverti) + str(self.taille))
+                self.texttour.set("Voulez vous ajouter un bateau?")
 
 
 
