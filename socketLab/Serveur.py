@@ -18,6 +18,37 @@ class ThreadConnexion(threading.Thread):
         threading.Thread.__init__(self)
         self.connexion = conn           # réf. du socket de connexion
         self.app = boss
+        self.x = None
+        self.y = None
+        self.horiverti = None
+        self.taille = None
+        self.add =None
+
+    def initial(self):
+        msgClient = self.connexion.recv(1024).decode("Utf8")
+        tab = msgClient.split(";")
+        self.x = tab[0]
+        self.y = tab[1]
+        self.horiverti =tab[2]
+        self.taille = tab[3]
+        self.add = tab[4]
+
+
+    def getx (self):
+        return self.x
+    def gety (self) :
+        return  self.y
+    def gettaille(self):
+        return  self.taille
+    def gethoriverti(self):
+        return self.horiverti
+    def getadd(self):
+        return  self.add
+    def envoyermsq(self,bool):
+        if bool == True :
+            self.connexion.send("OK".encode("Utf8"))
+        elif bool == False :
+            self.connexion.send("NOK".encode("Utf8"))
 
         # réf. de la fenêtre application
 
@@ -26,7 +57,9 @@ class ThreadConnexion(threading.Thread):
         msgClient = self.connexion.recv(1024).decode("Utf8")
         print("ref" + msgClient)
         if msgClient == 'usertoto':
-            return True
+            return ("user")
+        elif msgClient == 'adminadmin':
+            return ("admin")
         else:
             return False
 
@@ -43,6 +76,7 @@ class ThreadClients(threading.Thread):
         self.boss = boss                # réf. de la fenêtre application
         self.connex = connex
         self.connexion = []
+        self.admin = ThreadConnexion
 
     def run(self):
         "attente et prise en charge de nouvelles connexions clientes"
@@ -51,13 +85,26 @@ class ThreadClients(threading.Thread):
         self.connex.listen(5)
         # Gestion des connexions demandées par les clients :
         co = 1
+        admin = False
         while co:
+            while admin == False:
+                nouv_conn, adresse = self.connex.accept()
+                th = ThreadConnexion(self.boss, nouv_conn)
+                self.admin = th
+                if th.veriflogin() == 'admin':
+                    print("admincooo")
+                    self.boss.enregistrer_admin(nouv_conn)
+                    nouv_conn.send("serveur OK".encode("Utf8"))
+                    admin = True
+                else:
+                    nouv_conn.send("L'admin n'est pas encore connecté".encode("Utf8"))
+                    th.closeth()
             var = self.boss.recupvar()
-            if var != 0:
+            if var != 0 and admin == True:
                 nouv_conn, adresse = self.connex.accept()
                 # Créer un nouvel objet thread pour gérer la connexion :
                 th = ThreadConnexion(self.boss, nouv_conn)
-                if th.veriflogin() == True:
+                if th.veriflogin() == 'user':
                     var = self.boss.decrevar()
                     #th.start()
                     it = th.getName()        # identifiant unique du thread
@@ -73,8 +120,9 @@ class ThreadClients(threading.Thread):
                 else:
                     nouv_conn.send("wrong login".encode("Utf8"))
                     th.closeth()
-            else:
-                self.boss.initjeux()
+            elif var == 0 and admin == True:
+                self.boss.initjeuxihm()
+                #self.boss.initjeux()
                 co = 0
                 self.boss.joueur()
 
@@ -84,6 +132,7 @@ class ThreadClients(threading.Thread):
     def broadcast (self,msg) :
         for y in self.connexion :
            y.send(msg.encode("Utf8"))
+
 
 class AppBN(Frame):
     '''Fenêtre principale de l'application'''
@@ -139,6 +188,7 @@ class AppServeur(AppBN):
         st.pack()
 
         # partie serveur réseau :
+        self.conn_admin = None
         self.conn_client = {}  # dictionn. des connexions clients
         self.verrou = threading.Lock()  # verrou pour synchroniser threads
         # Initialisation du serveur - Mise en place du socket :
@@ -165,6 +215,9 @@ class AppServeur(AppBN):
         "Mémoriser la connexion dans un dictionnaire"
         self.conn_client[it] = conn
 
+    def enregistrer_admin(self, conn):
+        "Mémoriser la connexion de l'admin"
+        self.conn_admin = conn
     def afficher(self, txt):
         "afficher un message dans la zone de texte"
         self.avis.insert(END, txt)
@@ -175,6 +228,25 @@ class AppServeur(AppBN):
     def recupvar(self):
         return int(self.textlabel.get())
 
+    def initjeuxihm(self):
+        boardGame = BatNav.BoardGame(10)
+
+        gameMaster = BatNav.gameManager("name")
+        jeux = 1
+        while jeux == 1 :
+            self.accueil.admin.initial()
+            print(str(self.accueil.admin.gettaille()) + str(self.accueil.admin.getx()) + str(self.accueil.admin.gety()) + str(self.accueil.admin.gethoriverti()))
+            if gameMaster.tryAddBoat(BatNav.Bateau(int(self.accueil.admin.gettaille()), int(self.accueil.admin.getx()), int(self.accueil.admin.gety()), int(self.accueil.admin.gethoriverti()))) == 1 :
+                self.accueil.admin.envoyermsq(True)
+            else :
+                self.accueil.admin.envoyermsq(False)
+            boardGame.print()
+            print(self.accueil.admin.getadd())
+            if int(self.accueil.admin.getadd()) == 0 :
+                jeux = 0
+
+        print(gameMaster)
+        boardGame.print()
     def initjeux(self):
         # petitBateau = BatNav.Bateau(3, 6, 6, 0)
         # moyenBateau = BatNav.Bateau(4, 2, 2, 1)
