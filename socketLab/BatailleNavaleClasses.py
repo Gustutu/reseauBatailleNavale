@@ -132,49 +132,42 @@ class BoardGame:
         # horizontal
         if bateau.rotation == 0:
             # Verification collision
-            if bateau.Xpos+bateau.size > BoardGame.size:
+            if bateau.Xpos + bateau.size > BoardGame.size:
                 print("out of range")
                 return 0
 
-            for i in range(0, bateau.size-1):
-                if BoardGame.boardTab[bateau.Ypos][bateau.Xpos+i] == 1:
-                    print("there is another boat here (Pos: X Y)",
-                          bateau.Xpos+1, bateau.Ypos+1)
+            for i in range(0, bateau.size):
+                if BoardGame.boardTab[bateau.Ypos][bateau.Xpos + i] == 1:
+                    print("there is another boat here (Pos: X Y)", bateau.Xpos + 1, bateau.Ypos + 1)
                     return 0
-
-            # i = 0
             # Mise des cases à 1
-                else:
-                    for caseEtatBateau in bateau.etat:
-                        BoardGame.boardTab[bateau.Ypos][bateau.Xpos +
-                                                        i] = caseEtatBateau
-                        i = i+1
-                    BoardGame.bateauxList.append(bateau)
-                    return 1
+            for i in range(0, bateau.size):
+                for caseEtatBateau in bateau.etat:
+                    BoardGame.boardTab[bateau.Ypos][bateau.Xpos + i] = caseEtatBateau
+            BoardGame.bateauxList.append(bateau)
+            return 1
         # vertical
         else:
             # Verification collision
-            if bateau.Ypos+bateau.size > BoardGame.size:
-                print("max boat is ", bateau.Ypos+bateau.size)
+            if bateau.Ypos + bateau.size > BoardGame.size:
+                print("max boat is ", bateau.Ypos + bateau.size)
                 print("boardSize is ", BoardGame.size)
                 print("out of range")
                 return 0
 
-            for i in range(0, bateau.size-1):
-                if BoardGame.boardTab[bateau.Ypos+i][bateau.Xpos] == 1:
+            for i in range(0, bateau.size):
+                if BoardGame.boardTab[bateau.Ypos + i][bateau.Xpos] == 1:
                     print("there is another boat here (Pos: X Y)",
                           bateau.Xpos, bateau.Ypos)
                     return 0
-                # i = 0
-            # Mise des cases à 1
-                else:
-                    for caseEtatBateau in bateau.etat:
-                        BoardGame.boardTab[bateau.Ypos +
-                                           i][bateau.Xpos] = caseEtatBateau
-                        i = i+1
 
-                    BoardGame.bateauxList.append(bateau)
-                    return 1
+            # Mise des cases à 1
+            for i in range(0, bateau.size):
+                for caseEtatBateau in bateau.etat:
+                    BoardGame.boardTab[bateau.Ypos + i][bateau.Xpos] = caseEtatBateau
+
+            BoardGame.bateauxList.append(bateau)
+            return 1
 
     def handlePlayerShot(xpos, ypos):
         print("etat boardtab:", "x:", xpos, "y", ypos,
