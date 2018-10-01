@@ -5,10 +5,10 @@ import socket, sys, threading, time
 from Serveur import AppServeur
 host, port = '0.0.0.0', 2010
 largeur, hauteur = 700, 400
-COTE=400
-NB_DE_CASES=10
-PAS= COTE/NB_DE_CASES
-MARGE=5
+COTE = 400
+NB_DE_CASES = 10
+PAS = COTE/NB_DE_CASES
+MARGE = 5
 
 
 class ThreadSocket(threading.Thread):
@@ -46,9 +46,10 @@ class ThreadSocket(threading.Thread):
             elif t[0] =="A toi de jouer" :
                 self.app.setbouton(True)
             else :
-                cx = int(msg_recu[0])
-                cy = int(msg_recu[1])
-                message = msg_recu[2:]
+                tab = msg_recu.split(";")
+                cx = int(tab[0])
+                cy = int(tab[1])
+                message = tab[2]
                 print(cx, cy, message)
                 self.app.dessiner(cx - 1, cy - 1, message)
 
@@ -70,6 +71,7 @@ class AppClient(AppServeur):
         AppServeur.__init__(self, host, port, larg_c, haut_c)
 
 
+
     def Clic(self,evt):
         # position du pointeur de la souris
         if ((self.CX < NB_DE_CASES ) and (self.CY < NB_DE_CASES )):
@@ -79,7 +81,8 @@ class AppClient(AppServeur):
         print(self.CX,self.CY)
         if ((self.CX < NB_DE_CASES ) and (self.CY < NB_DE_CASES )):
             self.jeu.create_rectangle(MARGE + self.CX * PAS, MARGE + self.CY * PAS, PAS + MARGE + self.CX * PAS, PAS + MARGE + self.CY * PAS, outline='red')
-            self.textlabel.set(str(int(self.CX)+1)+str(int(self.CY)+1))
+            #modifié
+            self.textlabel.set(str(int(self.CX)+1)+';'+str(int(self.CY)+1))
 
     def dessiner(self,CX,CY,message):
         if message == "Touché":
@@ -91,15 +94,22 @@ class AppClient(AppServeur):
 
     def specificites(self):
         "préparer les objets spécifiques de la partie client"
-        self.jeu = Canvas(self, width=self.xm, height=self.ym,
+        self.jeu = Canvas(self, width=640, height=self.ym,
                           bg='ivory', bd=3, relief=SUNKEN)
-        self.jeu.pack(padx=4, pady=4, side=TOP)
+        self.jeu.pack(padx=1, pady=1, side=LEFT)
 
         self.jeu.bind("<Button-1>", self.Clic)
+
         self.texttour = StringVar()
         self.lab = Label(self, textvariable=self.texttour)
         self.texttour.set("")
-        self.lab.pack(side=BOTTOM, padx=5, pady=7)
+        self.lab.pack()
+        #side = BOTTOM, padx = 5, pady = 7
+        #Score
+        self.textscore = StringVar()
+        self.lab1 = Label(self, textvariable=self.textscore)
+        self.textscore.set("SCORE DES JOUEURS:")
+        self.lab1.pack(side=RIGHT, padx=5, pady=2)
         #self.textscore = StringVar()
         #self.score = Label(self, textvariable=self.textscore)
         #self.lab.pack(side=BOTTOM, padx=1, pady=5)
@@ -123,7 +133,7 @@ class AppClient(AppServeur):
 
     def envoyermsg(self):
         if self.texttour.get() == "A toi de jouer" :
-            self.connex.envoie_msg(str(int(self.CX)+1)+str(int(self.CY)+1))
+            self.connex.envoie_msg(str(int(self.CX)+1)+';'+str(int(self.CY)+1))
             self.texttour.set("Patienter")
 
     def setbouton(self,bool):

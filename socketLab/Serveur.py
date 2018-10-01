@@ -80,7 +80,6 @@ class ThreadClients(threading.Thread):
 
     def returncoor(self,numjoueur):
         msgClient = self.connexion[numjoueur].recv(1024).decode("Utf8")
-        print("zgeg : " + msgClient)
         return msgClient
     def broadcast (self,msg) :
         for y in self.connexion :
@@ -98,7 +97,9 @@ class AppBN(Frame):
         self.textlabel = StringVar()
         self.label = Label(self, textvariable=self.textlabel)
         self.textlabel.set("Bonjour")
-        self.label.pack(side=BOTTOM, padx=4, pady=6)
+        #modifié
+        self.label.pack()
+        #side=BOTTOM, padx=4, pady=6
         self.specificites()
 
     def specificites(self):
@@ -213,11 +214,12 @@ class AppServeur(AppBN):
               print("num : " + str(numjoueur))
               self.accueil.connexion[numjoueur].send("A toi de jouer".encode("Utf8"))
               msgClient = self.accueil.returncoor(numjoueur)
-              x = msgClient[0]
-              y = msgClient[1]
+              tab=msgClient.split(";")
+              x = tab[0]
+              y = tab[1]
               print(x, y)
               res = joueurs[numjoueur].shoot(int(x), int(y))
-              self.accueil.broadcast(x + y + res)
+              self.accueil.broadcast(x+';'+y+';'+res)
               if numjoueur == self.nbjou - 1:
                   numjoueur = 0
               else :
