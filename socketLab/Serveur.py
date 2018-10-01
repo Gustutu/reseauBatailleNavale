@@ -309,7 +309,7 @@ class AppServeur(AppBN):
             print('player:' + str(joueur.name))
             print(str(joueur.score))
             print('')
-            self.accueil.broadcast("Le score, pour le joueur:" + str(joueur.name) + "est" + str(joueur.score)+"\n")
+            self.accueil.broadcast("Le score, pour le joueur: " + str(joueur.name) + " est " + str(joueur.score)+"\n")
         self.accueil.broadcast("FIN")
 
 
