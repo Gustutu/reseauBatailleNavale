@@ -94,16 +94,23 @@ class gameManager:
 class gamePlayer:
     def __init__(self, name):
         self.name = name
+        self.score = 0
 
     def shoot(self, Xpos, Ypos):
         if BoardGame.handlePlayerShot(Xpos, Ypos) == 1:
             print("Touché", Xpos, Ypos)
+            self.score = self.score + 1
+            return ("Touché")
         elif BoardGame.handlePlayerShot(Xpos, Ypos) == 2:
             print("Coulé", Xpos, Ypos)
+            return ("Coulé")
         elif BoardGame.handlePlayerShot(Xpos, Ypos) == 0:
             print("Loupé", Xpos, Ypos)
+            return ("Loupé")
         else:
             print("Error")
+            return ("Error")
+
 
 
 class BoardGame:

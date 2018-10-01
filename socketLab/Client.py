@@ -39,11 +39,20 @@ class ThreadSocket(threading.Thread):
             print("*%s*" % msg_recu)
             # le message reçu est d'abord converti en une liste :
             t =msg_recu.split(',')
-            if t[0] =="" or t[0] =="fin":
-                # fermer le présent thread :
-                break
+            if t[0] =="FIN":
+                self.app.setbouton(False)
             elif t[0] =="serveur OK":
                 self.connexion.send("client OK".encode("Utf8"))
+            elif t[0] =="A toi de jouer" :
+                self.app.setbouton(True)
+            else :
+                cx = int(msg_recu[0])
+                cy = int(msg_recu[1])
+                message = msg_recu[2:]
+                print(cx, cy, message)
+                self.app.dessiner(cx - 1, cy - 1, message)
+
+
 
         # Le thread <réception> se termine ici.
         print("Client arrêté. Connexion interrompue.")
@@ -70,16 +79,31 @@ class AppClient(AppServeur):
         print(self.CX,self.CY)
         if ((self.CX < NB_DE_CASES ) and (self.CY < NB_DE_CASES )):
             self.jeu.create_rectangle(MARGE + self.CX * PAS, MARGE + self.CY * PAS, PAS + MARGE + self.CX * PAS, PAS + MARGE + self.CY * PAS, outline='red')
-            self.textlabel.set(str(int(self.CX))+str(int(self.CY)))
+            self.textlabel.set(str(int(self.CX)+1)+str(int(self.CY)+1))
 
-
+    def dessiner(self,CX,CY,message):
+        if message == "Touché":
+            self.jeu.create_rectangle(MARGE + CX * PAS, MARGE + CY * PAS, PAS + MARGE + CX * PAS,
+                                      PAS + MARGE + CY * PAS, fill='orange')
+        elif message == "Loupé":
+            self.jeu.create_rectangle(MARGE + CX * PAS, MARGE + CY * PAS, PAS + MARGE + CX * PAS,
+                                      PAS + MARGE + CY * PAS, fill='blue')
 
     def specificites(self):
         "préparer les objets spécifiques de la partie client"
         self.jeu = Canvas(self, width=self.xm, height=self.ym,
                           bg='ivory', bd=3, relief=SUNKEN)
         self.jeu.pack(padx=4, pady=4, side=TOP)
+
         self.jeu.bind("<Button-1>", self.Clic)
+        self.texttour = StringVar()
+        self.lab = Label(self, textvariable=self.texttour)
+        self.texttour.set("")
+        self.lab.pack(side=BOTTOM, padx=5, pady=7)
+        #self.textscore = StringVar()
+        #self.score = Label(self, textvariable=self.textscore)
+        #self.lab.pack(side=BOTTOM, padx=1, pady=5)
+
         x = 0
         while (x <= NB_DE_CASES):
             self.jeu.create_line(MARGE,MARGE+PAS*x,MARGE+COTE,MARGE+PAS*x,fill='black')
@@ -98,10 +122,15 @@ class AppClient(AppServeur):
 
 
     def envoyermsg(self):
-        self.connex.envoie_msg(str(int(self.CX))+str(int(self.CY)))
+        if self.texttour.get() == "A toi de jouer" :
+            self.connex.envoie_msg(str(int(self.CX)+1)+str(int(self.CY)+1))
+            self.texttour.set("Patienter")
 
-
-
+    def setbouton(self,bool):
+        if bool ==True :
+            self.texttour.set("A toi de jouer")
+        elif bool == False :
+            self.texttour.set("FIN DU JEU")
 
 
 

@@ -3,6 +3,7 @@ from tkinter import *
 import socket
 import threading
 from socketLab import BatailleNavaleClasses as BatNav
+import time
 
 host, port = '0.0.0.0', 2010
 largeur, hauteur = 700, 400
@@ -77,11 +78,13 @@ class ThreadClients(threading.Thread):
                 co = 0
                 self.boss.joueur()
 
-    def returncoor(self):
-        print( "hello")
-        msgClient = self.connexion[1].recv(1024).decode("Utf8")
+    def returncoor(self,numjoueur):
+        msgClient = self.connexion[numjoueur].recv(1024).decode("Utf8")
         print("zgeg : " + msgClient)
         return msgClient
+    def broadcast (self,msg) :
+        for y in self.connexion :
+           y.send(msg.encode("Utf8"))
 
 class AppBN(Frame):
     '''Fenêtre principale de l'application'''
@@ -103,8 +106,9 @@ class AppBN(Frame):
 
 
 class AppServeur(AppBN):
-    gameMaster = None
+    gameMaster = BatNav.gameManager("nom")
     boardGame = None
+    nbjou = None
 
     """fenêtre principale de l'application (serveur ou client)"""
 
@@ -150,7 +154,9 @@ class AppServeur(AppBN):
             txt = "Serveur up \n"
             self.avis.insert(END, txt)
             # démarrage du thread guettant la connexion des clients :
-            self.textlabel.set(input("nb de joueur ?"))
+            nb = input("nb de joueur ?")
+            self.nbjou = int(nb)
+            self.textlabel.set(nb)
             self.accueil = ThreadClients(self, connexion)
             self.accueil.start()
 
@@ -197,7 +203,28 @@ class AppServeur(AppBN):
         boardGame.print()
 
     def joueur(self):
-        msgClient = self.accueil.returncoor()
+        joueurs = []
+        numjoueur = 0
+        print(self.nbjou)
+        for num in range(0,self.nbjou) :
+            joueurs.append(BatNav.gamePlayer(num))
+        while self.gameMaster.endOfGame == False:
+              time.sleep(2)
+              print("num : " + str(numjoueur))
+              self.accueil.connexion[numjoueur].send("A toi de jouer".encode("Utf8"))
+              msgClient = self.accueil.returncoor(numjoueur)
+              x = msgClient[0]
+              y = msgClient[1]
+              print(x, y)
+              res = joueurs[numjoueur].shoot(int(x), int(y))
+              self.accueil.broadcast(x + y + res)
+              if numjoueur == self.nbjou - 1:
+                  numjoueur = 0
+              else :
+                numjoueur = numjoueur + 1
+        self.accueil.broadcast("FIN")
+
+
       #jeux
 
 
