@@ -282,6 +282,7 @@ class AppServeur(AppBN):
         for num in range(0,self.nbjou) :
             joueurs.append(BatNav.gamePlayer(num))
         while self.gameMaster.endOfGame == False:
+
               time.sleep(2)
               print("num : " + str(numjoueur))
               self.accueil.connexion[numjoueur].send("A toi de jouer".encode("Utf8"))
@@ -292,10 +293,23 @@ class AppServeur(AppBN):
               print(x, y)
               res = joueurs[numjoueur].shoot(int(x), int(y))
               self.accueil.broadcast(x+';'+y+';'+res)
+
+              #actualisation du score
+              for joueur in joueurs:
+                print('player:' + str(joueur.name))
+                print(str(joueur.score))
+                print('')
+              #changement de joueur
               if numjoueur == self.nbjou - 1:
                   numjoueur = 0
               else :
                 numjoueur = numjoueur + 1
+
+        for joueur in joueurs:
+            print('player:' + str(joueur.name))
+            print(str(joueur.score))
+            print('')
+            self.accueil.broadcast("Le score, pour le joueur:" + str(joueur.name) + "est" + str(joueur.score)+"\n")
         self.accueil.broadcast("FIN")
 
 

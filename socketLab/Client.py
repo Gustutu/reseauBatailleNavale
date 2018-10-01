@@ -36,13 +36,15 @@ class ThreadSocket(threading.Thread):
             msg_recu = self.connexion.recv(1024).decode("Utf8")
             print("*%s*" % msg_recu)
             # le message reçu est d'abord converti en une liste :
-            t =msg_recu.split(',')
+            t=msg_recu.split(',')
             if t[0] =="FIN":
                 self.app.setbouton(False)
             elif t[0] =="serveur OK":
                 self.connexion.send("client OK".encode("Utf8"))
             elif t[0] =="A toi de jouer" :
                 self.app.setbouton(True)
+            elif t[0] =="Le score":
+                self.app.setscore(msg_recu)
             else :
                 tab = msg_recu.split(";")
                 cx = int(tab[0])
@@ -50,8 +52,6 @@ class ThreadSocket(threading.Thread):
                 message = tab[2]
                 print(cx, cy, message)
                 self.app.dessiner(cx - 1, cy - 1, message)
-
-
 
         # Le thread <réception> se termine ici.
         print("Client arrêté. Connexion interrompue.")
@@ -232,6 +232,7 @@ class AppClient(AppServeur):
     CX = 0
     CY = 0
 
+
     def __init__(self, host, port, larg_c, haut_c):
         AppServeur.__init__(self, host, port, larg_c, haut_c)
 
@@ -253,6 +254,7 @@ class AppClient(AppServeur):
         if message == "Touché":
             self.jeu.create_rectangle(MARGE + CX * PAS, MARGE + CY * PAS, PAS + MARGE + CX * PAS,
                                       PAS + MARGE + CY * PAS, fill='orange')
+
         elif message == "Loupé":
             self.jeu.create_rectangle(MARGE + CX * PAS, MARGE + CY * PAS, PAS + MARGE + CX * PAS,
                                       PAS + MARGE + CY * PAS, fill='blue')
@@ -269,15 +271,6 @@ class AppClient(AppServeur):
         self.lab = Label(self, textvariable=self.texttour)
         self.texttour.set("")
         self.lab.pack()
-        #side = BOTTOM, padx = 5, pady = 7
-        #Score
-        self.textscore = StringVar()
-        self.lab1 = Label(self, textvariable=self.textscore)
-        self.textscore.set("SCORE DES JOUEURS:")
-        self.lab1.pack(side=RIGHT, padx=5, pady=2)
-        #self.textscore = StringVar()
-        #self.score = Label(self, textvariable=self.textscore)
-        #self.lab.pack(side=BOTTOM, padx=1, pady=5)
 
         x = 0
         while (x <= NB_DE_CASES):
@@ -306,6 +299,13 @@ class AppClient(AppServeur):
             self.texttour.set("A toi de jouer")
         elif bool == False :
             self.texttour.set("FIN DU JEU")
+
+    def setscore(self, msg):
+        self.textscore = StringVar()
+        self.lab1 = Label(self, textvariable=self.textscore)
+        self.textscore.set(msg)
+        self.lab1.pack(side=RIGHT, padx=5, pady=2)
+
 
 
 
