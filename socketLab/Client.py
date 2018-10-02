@@ -2,13 +2,52 @@
 
 from tkinter import *
 import socket, sys, threading, time
-from Serveur import AppServeur
-host, port = '0.0.0.0', 2010
+host, port = '172.20.10.11', 2010
 largeur, hauteur = 700, 400
 COTE = 400
 NB_DE_CASES = 10
 PAS = COTE/NB_DE_CASES
 MARGE = 5
+
+class AppBN(Frame):
+    '''Fenêtre principale de l'application'''
+
+    def __init__(self, larg_c, haut_c):
+        Frame.__init__(self)
+        self.pack()
+        self.xm, self.ym = larg_c, haut_c
+        self.bTir = Button(self, text="Send", command=self.envoyermsg)
+        self.bTir.pack(side=BOTTOM, padx=5, pady=5)
+        self.textlabel = StringVar()
+        self.label = Label(self, textvariable=self.textlabel)
+        self.textlabel.set("Bonjour")
+        #modifié
+        self.label.pack()
+        #side=BOTTOM, padx=4, pady=6
+        self.specificites()
+
+    def specificites(self):
+        print()
+
+
+class AppServeur(AppBN):
+    boardGame = None
+    nbjou = None
+
+    """fenêtre principale de l'application (serveur ou client)"""
+
+    def __init__(self, host, port, larg_c, haut_c):
+        self.host, self.port = host, port
+        AppBN.__init__(self, larg_c, haut_c)
+        self.active = 1
+        # témoin d'activité
+        # self.bind('<Destroy>',self.fermer_threads)
+
+    def envoyermsg(self):
+        for cli in self.conn_client:
+            print(cli)
+        self.textlabel.set(0)
+
 
 
 class ThreadSocket(threading.Thread):
@@ -339,8 +378,6 @@ class AppClient(AppServeur):
         self.lab1 = Label(self, textvariable=self.textscore)
         self.textscore.set(msg)
         self.lab1.pack(side=RIGHT, padx=5, pady=2)
-
-
 
 
 if __name__ =='__main__':
